@@ -13,8 +13,7 @@ func main() {
 	fmt.Println("1. Open account")
 	reader := bufio.NewScanner(os.Stdin)
 	for {
-		reader.Scan()
-		input := reader.Text()
+		input := readFromCmdLine(reader)
 		if input == "0" {
 			break
 		}
@@ -26,4 +25,10 @@ func main() {
 
 		fmt.Println("Unknown command")
 	}
+}
+
+func readFromCmdLine(reader *bufio.Scanner) string {
+	reader.Scan()
+	input := reader.Text()
+	return input
 }
