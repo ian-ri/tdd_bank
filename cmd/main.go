@@ -1,17 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"bufio"
+	"strconv"
+	"io"
 )
 
 func main() {
-	fmt.Println("Welcome to the Golang bank")
-	fmt.Println("You have the folllowing choices:")
-	fmt.Println("0. Exit")
-	fmt.Println("1. Open account")
-	reader := bufio.NewScanner(os.Stdin)
+	startBankUI(os.Stdin, os.Stdout)
+}
+
+func startBankUI(reader io.Reader, writer io.Writer) {
+	writer.Write([]byte("Welcome to the Golang bank\n"))
+	writer.Write([]byte("You have the folllowing choices:\n"))
+	writer.Write([]byte("0. Exit\n"))
+	writer.Write([]byte("1. Open account\n"))
 	for {
 		input := readFromCmdLine(reader)
 		if input == "0" {
@@ -19,16 +23,31 @@ func main() {
 		}
 
 		if input == "1" {
-			fmt.Println("Feature incomplete!")
+			writer.Write([]byte("How much money?\n"))
+			amount := readIntFromCmdLine(writer, reader)
+			doSomething(amount)
+			writer.Write([]byte("Feature incomplete!\n"))
 			continue
 		}
 
-		fmt.Println("Unknown command")
+		writer.Write([]byte("Unknown command\n"))
 	}
 }
 
-func readFromCmdLine(reader *bufio.Scanner) string {
-	reader.Scan()
-	input := reader.Text()
-	return input
+func doSomething(something interface{}) {}
+
+func readIntFromCmdLine(writer io.Writer, reader io.Reader) int64 {
+	input := readFromCmdLine(reader)
+	amount, err := strconv.ParseInt(input, 10, 64)
+	if err != nil {
+		writer.Write([]byte("You need to insert an integer\n"))
+		os.Exit(1)
+	}
+	return amount
+}
+
+func readFromCmdLine(reader io.Reader) string {
+	buffReader := bufio.NewScanner(reader)
+	buffReader.Scan()
+	return buffReader.Text()
 }
