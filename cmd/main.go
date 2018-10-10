@@ -12,19 +12,20 @@ func main() {
 }
 
 func startBankUI(reader io.Reader, writer io.Writer) {
+	scanner := bufio.NewScanner(reader)
 	writer.Write([]byte("Welcome to the Golang bank\n"))
 	writer.Write([]byte("You have the folllowing choices:\n"))
 	writer.Write([]byte("0. Exit\n"))
 	writer.Write([]byte("1. Open account\n"))
 	for {
-		input := readFromCmdLine(reader)
+		input := readFromCmdLine(scanner)
 		if input == "0" {
 			break
 		}
 
 		if input == "1" {
 			writer.Write([]byte("How much money?\n"))
-			amount := readIntFromCmdLine(writer, reader)
+			amount := readIntFromCmdLine(writer, scanner)
 			doSomething(amount)
 			writer.Write([]byte("Feature incomplete!\n"))
 			continue
@@ -36,8 +37,8 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 
 func doSomething(something interface{}) {}
 
-func readIntFromCmdLine(writer io.Writer, reader io.Reader) int64 {
-	input := readFromCmdLine(reader)
+func readIntFromCmdLine(writer io.Writer, scanner *bufio.Scanner) int64 {
+	input := readFromCmdLine(scanner)
 	amount, err := strconv.ParseInt(input, 10, 64)
 	if err != nil {
 		writer.Write([]byte("You need to insert an integer\n"))
@@ -46,8 +47,7 @@ func readIntFromCmdLine(writer io.Writer, reader io.Reader) int64 {
 	return amount
 }
 
-func readFromCmdLine(reader io.Reader) string {
-	buffReader := bufio.NewScanner(reader)
-	buffReader.Scan()
-	return buffReader.Text()
+func readFromCmdLine(scanner *bufio.Scanner) string {
+	scanner.Scan()
+	return scanner.Text()
 }
