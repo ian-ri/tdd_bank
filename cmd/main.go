@@ -1,10 +1,10 @@
 package main
 
 import (
-	"os"
 	"bufio"
-	"strconv"
 	"io"
+	"os"
+	"strconv"
 )
 
 func main() {
@@ -17,6 +17,10 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	writer.Write([]byte("You have the folllowing choices:\n"))
 	writer.Write([]byte("0. Exit\n"))
 	writer.Write([]byte("1. Open account\n"))
+	writer.Write([]byte("2. Do I have an opened account?\n"))
+
+	var account *account
+
 	for {
 		input := readFromCmdLine(scanner)
 		if input == "0" {
@@ -27,11 +31,26 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 			writer.Write([]byte("How much money?\n"))
 			amount := readIntFromCmdLine(writer, scanner)
 			doSomething(amount)
-			writer.Write([]byte("Feature incomplete!\n"))
-			continue
+			account = NewAccount(amount)
+
+			if account == nil {
+				writer.Write([]byte("Cannot be negative\n"))
+			} else {
+				writer.Write([]byte("Account opened\n"))
+
+				continue
+			}
 		}
 
-		writer.Write([]byte("Unknown command\n"))
+		if input == "2" {
+			if account != nil {
+				writer.Write([]byte("Yes"))
+			} else {
+				writer.Write([]byte("No"))
+			}
+		}
+
+		//writer.Write([]byte("Unknown command\n"))
 	}
 }
 
