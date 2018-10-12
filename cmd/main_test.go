@@ -19,7 +19,8 @@ func TestStartBankUI(t *testing.T) {
 			"0. Exit",
 			"1. Open account",
 			"2. Do I have an opened account?",
-			"NoHow much money?",
+			"No",
+			"How much money?",
 			"Account opened",
 			"Yes",
 		}
@@ -33,7 +34,7 @@ func TestStartBankUI(t *testing.T) {
 
 		output, _ := ioutil.ReadAll(out)
 
-		require.Equal(t, strings.Join(expectedLines, "\n"), string(output))
+		require.Equal(t, strings.Join(expectedLines, "\n") + "\n", string(output))
 	})
 
 	t.Run("negative check", func(t *testing.T) {
@@ -44,7 +45,8 @@ func TestStartBankUI(t *testing.T) {
 			"0. Exit",
 			"1. Open account",
 			"2. Do I have an opened account?",
-			"NoHow much money?",
+			"No",
+			"How much money?",
 			"Cannot be negative",
 			"No",
 		}
@@ -58,6 +60,6 @@ func TestStartBankUI(t *testing.T) {
 
 		output, _ := ioutil.ReadAll(out)
 
-		require.Equal(t, strings.Join(expectedLines, "\n"), string(output))
+		require.Equal(t, strings.Join(expectedLines, "\n") + "\n", string(output))
 	})
 }

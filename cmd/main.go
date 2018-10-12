@@ -30,7 +30,6 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 		if input == "1" {
 			writer.Write([]byte("How much money?\n"))
 			amount := readIntFromCmdLine(writer, scanner)
-			doSomething(amount)
 			account = NewAccount(amount)
 
 			if account == nil {
@@ -44,17 +43,14 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 
 		if input == "2" {
 			if account != nil {
-				writer.Write([]byte("Yes"))
+				writer.Write([]byte("Yes\n"))
 			} else {
-				writer.Write([]byte("No"))
+				writer.Write([]byte("No\n"))
 			}
 		}
 
-		//writer.Write([]byte("Unknown command\n"))
 	}
 }
-
-func doSomething(something interface{}) {}
 
 func readIntFromCmdLine(writer io.Writer, scanner *bufio.Scanner) int64 {
 	input := readFromCmdLine(scanner)
