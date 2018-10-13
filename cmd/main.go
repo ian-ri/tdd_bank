@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"github.com/mmircea16/tdd_bank/cmd/account"
+	"fmt"
 )
 
 func main() {
@@ -19,10 +21,11 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	writer.Write([]byte("1. Open account\n"))
 	writer.Write([]byte("2. Do I have an opened account?\n"))
 
-	var account *account
+	var myAccount *account.Account
 
 	for {
 		input := readFromCmdLine(scanner)
+
 		if input == "0" {
 			break
 		}
@@ -30,9 +33,9 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 		if input == "1" {
 			writer.Write([]byte("How much money?\n"))
 			amount := readIntFromCmdLine(writer, scanner)
-			account = NewAccount(amount)
+			myAccount = account.NewAccount(amount)
 
-			if account == nil {
+			if myAccount == nil {
 				writer.Write([]byte("Cannot be negative\n"))
 			} else {
 				writer.Write([]byte("Account opened\n"))
@@ -42,7 +45,7 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 		}
 
 		if input == "2" {
-			if account != nil {
+			if myAccount != nil {
 				writer.Write([]byte("Yes\n"))
 			} else {
 				writer.Write([]byte("No\n"))
