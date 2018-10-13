@@ -1,65 +1,89 @@
 package main
 
 import (
-	"bytes"
-	"io/ioutil"
-	"os"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"io"
+	"bufio"
 )
 
 func TestStartBankUI(t *testing.T) {
 	t.Run("should be able open an account", func(t *testing.T) {
-		commands := []string{"2", "1", "20", "2", "0"}
-		expectedLines := []string{
-			"Welcome to the Golang bank",
-			"You have the folllowing choices:",
-			"0. Exit",
-			"1. Open account",
-			"2. Do I have an opened account?",
-			"No",
-			"How much money?",
-			"Account opened",
-			"Yes",
-		}
-		testCase := strings.Join(commands, "\n")
-		ioutil.WriteFile("/tmp/testin", []byte(testCase), os.ModePerm)
-		in, _ := os.Open("/tmp/testin")
+		cmdLine := NewFakeCmdLine()
 
-		out := new(bytes.Buffer)
+		go startBankUI(cmdLine, cmdLine)
 
-		startBankUI(in, out)
-
-		output, _ := ioutil.ReadAll(out)
-
-		require.Equal(t, strings.Join(expectedLines, "\n") + "\n", string(output))
+		expectLine(t, cmdLine, "Welcome to the Golang bank")
+		expectLine(t, cmdLine, "You have the folllowing choices:")
+		expectLine(t, cmdLine, "0. Exit")
+		expectLine(t, cmdLine, "1. Open account")
+		expectLine(t, cmdLine, "2. Do I have an opened account?")
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "No")
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "20")
+		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "Yes")
 	})
 
 	t.Run("negative check", func(t *testing.T) {
-		commands := []string{"2", "1", "-20", "2", "0"}
-		expectedLines := []string{
-			"Welcome to the Golang bank",
-			"You have the folllowing choices:",
-			"0. Exit",
-			"1. Open account",
-			"2. Do I have an opened account?",
-			"No",
-			"How much money?",
-			"Cannot be negative",
-			"No",
-		}
-		testCase := strings.Join(commands, "\n")
-		ioutil.WriteFile("/tmp/testin", []byte(testCase), os.ModePerm)
-		in, _ := os.Open("/tmp/testin")
+		cmdLine := NewFakeCmdLine()
 
-		out := new(bytes.Buffer)
+		go startBankUI(cmdLine, cmdLine)
 
-		startBankUI(in, out)
-
-		output, _ := ioutil.ReadAll(out)
-
-		require.Equal(t, strings.Join(expectedLines, "\n") + "\n", string(output))
+		expectLine(t, cmdLine, "Welcome to the Golang bank")
+		expectLine(t, cmdLine, "You have the folllowing choices:")
+		expectLine(t, cmdLine, "0. Exit")
+		expectLine(t, cmdLine, "1. Open account")
+		expectLine(t, cmdLine, "2. Do I have an opened account?")
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "No")
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "-20")
+		expectLine(t, cmdLine, "Cannot be negative")
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "No")
 	})
+}
+
+func expectLine(t *testing.T, buffer io.Reader, line string) {
+	scanner := bufio.NewScanner(buffer)
+	scanner.Scan()
+	require.Equal(t, line, scanner.Text())
+}
+
+func respond(buffer io.Writer, line string) {
+	buffer.Write([]byte(line + "\n"))
+}
+
+func NewFakeCmdLine() *fakeCmdLine {
+	return &fakeCmdLine{console: make(chan string)}
+}
+
+type fakeCmdLine struct {
+	console chan string
+}
+
+func (cmdLine *fakeCmdLine) Write(p []byte) (n int, err error) {
+	cmdLine.console <- string(p)
+	return len(p), nil
+}
+
+func (cmdLine *fakeCmdLine) Read(p []byte) (n int, err error) {
+	content := <-cmdLine.console
+
+	contentLen := len(p)
+	if len(content) < len(p) {
+		contentLen = len(content)
+	}
+
+	for i := 0; i < contentLen; i++ {
+		p[i] = []byte(content)[i]
+	}
+
+	return contentLen, nil
 }
