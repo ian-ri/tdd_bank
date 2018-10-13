@@ -14,11 +14,7 @@ func TestStartBankUI(t *testing.T) {
 
 		go startBankUI(cmdLine, cmdLine)
 
-		expectLine(t, cmdLine, "Welcome to the Golang bank")
-		expectLine(t, cmdLine, "You have the folllowing choices:")
-		expectLine(t, cmdLine, "0. Exit")
-		expectLine(t, cmdLine, "1. Open account")
-		expectLine(t, cmdLine, "2. Do I have an opened account?")
+		expectMenu(t, cmdLine)
 		respond(cmdLine, "2")
 		expectLine(t, cmdLine, "No")
 		respond(cmdLine, "1")
@@ -34,11 +30,7 @@ func TestStartBankUI(t *testing.T) {
 
 		go startBankUI(cmdLine, cmdLine)
 
-		expectLine(t, cmdLine, "Welcome to the Golang bank")
-		expectLine(t, cmdLine, "You have the folllowing choices:")
-		expectLine(t, cmdLine, "0. Exit")
-		expectLine(t, cmdLine, "1. Open account")
-		expectLine(t, cmdLine, "2. Do I have an opened account?")
+		expectMenu(t, cmdLine)
 		respond(cmdLine, "2")
 		expectLine(t, cmdLine, "No")
 		respond(cmdLine, "1")
@@ -48,6 +40,14 @@ func TestStartBankUI(t *testing.T) {
 		respond(cmdLine, "2")
 		expectLine(t, cmdLine, "No")
 	})
+}
+
+func expectMenu(t *testing.T, cmdLine *fakeCmdLine) {
+	expectLine(t, cmdLine, "Welcome to the Golang bank")
+	expectLine(t, cmdLine, "You have the folllowing choices:")
+	expectLine(t, cmdLine, "0. Exit")
+	expectLine(t, cmdLine, "1. Open account")
+	expectLine(t, cmdLine, "2. Do I have an opened account?")
 }
 
 func expectLine(t *testing.T, buffer io.Reader, line string) {
