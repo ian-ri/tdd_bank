@@ -1,6 +1,6 @@
-* refactor NewAccount to return the account and  error
 * check balance: handle error case
 * withdraw money: no overdraft
 * implement overdraft: when first creating the account, and then at withdrawal
 * inform bank auditor when the overdraft is taken
 * compute interest on overdraft
+* refactor NewAccount to return the account and  error

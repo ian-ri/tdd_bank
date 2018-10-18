@@ -20,6 +20,7 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	writer.Write([]byte("0. Exit\n"))
 	writer.Write([]byte("1. Open account\n"))
 	writer.Write([]byte("2. Do I have an opened account?\n"))
+	writer.Write([]byte("3. Check Balance\n"))
 
 	var myAccount *account.Account
 
@@ -50,6 +51,15 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 			} else {
 				writer.Write([]byte("No\n"))
 			}
+		}
+
+		if input == "3" {
+			if myAccount != nil {
+				writer.Write([]byte(fmt.Sprintf("%d\n", myAccount.CheckBalance())))
+			} else {
+				writer.Write([]byte("No account available\n"))
+			}
+
 		}
 
 	}

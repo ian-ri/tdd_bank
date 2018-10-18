@@ -15,5 +15,10 @@ func TestAccount(t *testing.T) {
 		account := NewAccount(-10)
 		require.Nil(t,account)
 	} )
+
+	t.Run("check initial balance", func(t *testing.T) {
+		account := NewAccount(50)
+		require.Equal(t, int64(50), account.CheckBalance())
+	})
 }
 

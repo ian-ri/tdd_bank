@@ -40,6 +40,30 @@ func TestStartBankUI(t *testing.T) {
 		respond(cmdLine, "2")
 		expectLine(t, cmdLine, "No")
 	})
+
+	t.Run("open account and check balance", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+
+		go startBankUI(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "100")
+		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "100")
+	})
+
+	t.Run("check balance on non-existant account", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+
+		go startBankUI(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "No account available")
+	})
 }
 
 func expectMenu(t *testing.T, cmdLine *fakeCmdLine) {
@@ -48,12 +72,14 @@ func expectMenu(t *testing.T, cmdLine *fakeCmdLine) {
 	expectLine(t, cmdLine, "0. Exit")
 	expectLine(t, cmdLine, "1. Open account")
 	expectLine(t, cmdLine, "2. Do I have an opened account?")
+	expectLine(t, cmdLine, "3. Check Balance")
 }
 
 func expectLine(t *testing.T, buffer io.Reader, line string) {
 	scanner := bufio.NewScanner(buffer)
 	scanner.Scan()
-	require.Equal(t, line, scanner.Text())
+	text := scanner.Text()
+	require.Equal(t, line, text)
 }
 
 func respond(buffer io.Writer, line string) {

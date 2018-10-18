@@ -1,9 +1,12 @@
 package account
 
 type Account struct {
-
+	balance int64
 }
 
+func (a *Account) CheckBalance() int64 {
+	return a.balance
+}
 
 func NewAccount (amount int64) *Account {
 
@@ -12,6 +15,7 @@ func NewAccount (amount int64) *Account {
 		return nil
 	}
 
-	return &Account{}
+
+	return &Account{balance: amount}
 
 }
