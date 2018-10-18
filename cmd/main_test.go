@@ -64,6 +64,24 @@ func TestStartBankUI(t *testing.T) {
 		respond(cmdLine, "3")
 		expectLine(t, cmdLine, "No account available")
 	})
+
+	t.Run("open account and withdraw money", func(t *testing.T){
+		cmdLine := NewFakeCmdLine()
+
+		go startBankUI(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "100")
+		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "4")
+		expectLine(t, cmdLine, "How much money to withdraw?")
+		respond(cmdLine, "20")
+		expectLine(t, cmdLine, "Successful")
+		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "80")
+	})
 }
 
 func expectMenu(t *testing.T, cmdLine *fakeCmdLine) {
@@ -73,6 +91,7 @@ func expectMenu(t *testing.T, cmdLine *fakeCmdLine) {
 	expectLine(t, cmdLine, "1. Open account")
 	expectLine(t, cmdLine, "2. Do I have an opened account?")
 	expectLine(t, cmdLine, "3. Check Balance")
+	expectLine(t, cmdLine, "4. Withdraw Money")
 }
 
 func expectLine(t *testing.T, buffer io.Reader, line string) {

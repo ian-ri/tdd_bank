@@ -21,6 +21,7 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	writer.Write([]byte("1. Open account\n"))
 	writer.Write([]byte("2. Do I have an opened account?\n"))
 	writer.Write([]byte("3. Check Balance\n"))
+	writer.Write([]byte("4. Withdraw Money\n"))
 
 	var myAccount *account.Account
 
@@ -60,6 +61,13 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 				writer.Write([]byte("No account available\n"))
 			}
 
+		}
+
+		if input == "4" {
+			writer.Write([]byte("How much money to withdraw?\n"))
+			amount:=readIntFromCmdLine(writer, scanner)
+			myAccount.Withdraw(amount)
+			writer.Write([]byte("Successful\n"))
 		}
 
 	}

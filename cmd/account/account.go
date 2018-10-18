@@ -19,3 +19,7 @@ func NewAccount (amount int64) *Account {
 	return &Account{balance: amount}
 
 }
+
+func  (a *Account) Withdraw(amount int64)  {
+	a.balance= a.balance-amount
+}

@@ -20,5 +20,12 @@ func TestAccount(t *testing.T) {
 		account := NewAccount(50)
 		require.Equal(t, int64(50), account.CheckBalance())
 	})
+
+	t.Run("withdraw money", func(t *testing.T) {
+		account := NewAccount(50)
+		account.Withdraw(10)
+		require.Equal(t, int64(40), account.CheckBalance())
+	})
+
 }
 
