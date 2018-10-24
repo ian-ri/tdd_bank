@@ -18,6 +18,8 @@ func TestStartBankUI(t *testing.T) {
 		respond(cmdLine, "2")
 		expectLine(t, cmdLine, "No")
 		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "How much money?")
 		respond(cmdLine, "20")
 		expectLine(t, cmdLine, "Account opened")
@@ -34,6 +36,8 @@ func TestStartBankUI(t *testing.T) {
 		respond(cmdLine, "2")
 		expectLine(t, cmdLine, "No")
 		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "How much money?")
 		respond(cmdLine, "-20")
 		expectLine(t, cmdLine, "Cannot be negative")
@@ -48,11 +52,33 @@ func TestStartBankUI(t *testing.T) {
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "How much money?")
 		respond(cmdLine, "100")
 		expectLine(t, cmdLine, "Account opened")
 		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "100")
+	})
+
+	t.Run("open account and check balance for non-existant account", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+
+		go startBankUI(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "100")
+		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "someone else")
+		expectLine(t, cmdLine, "account doesnt exist")
 	})
 
 	t.Run("check balance on non-existant account", func(t *testing.T) {
@@ -72,15 +98,40 @@ func TestStartBankUI(t *testing.T) {
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "How much money?")
 		respond(cmdLine, "100")
 		expectLine(t, cmdLine, "Account opened")
 		respond(cmdLine, "4")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "How much money to withdraw?")
 		respond(cmdLine, "20")
 		expectLine(t, cmdLine, "Successful")
 		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "80")
+	})
+
+
+	t.Run("open account and withdraw money from non-existant account", func(t *testing.T){
+		cmdLine := NewFakeCmdLine()
+
+		go startBankUI(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "100")
+		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "4")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some other account")
+		expectLine(t, cmdLine, "account doesnt exist")
 	})
 }
 

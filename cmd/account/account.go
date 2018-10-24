@@ -1,6 +1,7 @@
 package account
 
 type Account struct {
+	name string
 	balance int64
 }
 
@@ -8,7 +9,11 @@ func (a *Account) CheckBalance() int64 {
 	return a.balance
 }
 
-func NewAccount (amount int64) *Account {
+func (a *Account) GetName() string {
+	return a.name
+}
+
+func NewAccount (name string, amount int64) *Account {
 
 
 	if (amount < 0) {
@@ -16,7 +21,7 @@ func NewAccount (amount int64) *Account {
 	}
 
 
-	return &Account{balance: amount}
+	return &Account{name: name,balance: amount}
 
 }
 
