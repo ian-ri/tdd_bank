@@ -23,7 +23,7 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	writer.Write([]byte("3. Check Balance\n"))
 	writer.Write([]byte("4. Withdraw Money\n"))
 
-	var myAccount *account.Account
+	myAccounts := make(map[string]*account.Account)
 
 	for {
 		input := readFromCmdLine(scanner)
@@ -37,11 +37,13 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 			name := readFromCmdLine(scanner)
 			writer.Write([]byte("How much money?\n"))
 			amount := readIntFromCmdLine(writer, scanner)
-			myAccount = account.NewAccount(name, amount)
+			myAccount := account.NewAccount(name, amount)
 
 			if myAccount == nil {
 				writer.Write([]byte("Cannot be negative\n"))
 			} else {
+
+				myAccounts[name] = myAccount
 				writer.Write([]byte("Account opened\n"))
 
 				continue
@@ -49,7 +51,7 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 		}
 
 		if input == "2" {
-			if myAccount != nil {
+			if len(myAccounts) > 0 {
 				writer.Write([]byte("Yes\n"))
 			} else {
 				writer.Write([]byte("No\n"))
@@ -57,16 +59,16 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 		}
 
 		if input == "3" {
-			if isAccountExist(writer, scanner, myAccount) {
-				writer.Write([]byte(fmt.Sprintf("%d\n", myAccount.CheckBalance())))
+			if account, found := isAccountExist(writer, scanner, myAccounts); found {
+				writer.Write([]byte(fmt.Sprintf("%d\n", account.CheckBalance())))
 			}
 		}
 
 		if input == "4" {
-			if isAccountExist(writer, scanner, myAccount) {
+			if  account, found := isAccountExist(writer, scanner, myAccounts); found {
 				writer.Write([]byte("How much money to withdraw?\n"))
 				amount := readIntFromCmdLine(writer, scanner)
-				myAccount.Withdraw(amount)
+				account.Withdraw(amount)
 				writer.Write([]byte("Successful\n"))
 			}
 		}
@@ -74,20 +76,20 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	}
 }
 
-func isAccountExist(writer io.Writer, scanner *bufio.Scanner, account *account.Account) bool {
-	if account != nil {
+func isAccountExist(writer io.Writer, scanner *bufio.Scanner, accounts map[string]*account.Account) (*account.Account, bool) {
+	if len(accounts) > 0 {
 		writer.Write([]byte("Enter account name\n"))
 		name := readFromCmdLine(scanner)
-		actualName := account.GetName()
-		if actualName == name {
-			return true
+
+		if account, found := accounts[name]; found {
+			return account, true
 		}else {
 			writer.Write([]byte("account doesnt exist\n"))
 		}
 	} else {
 		writer.Write([]byte("No account available\n"))
 	}
-	return false
+	return nil, false
 }
 
 func readIntFromCmdLine(writer io.Writer, scanner *bufio.Scanner) int64 {

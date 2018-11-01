@@ -27,6 +27,42 @@ func TestStartBankUI(t *testing.T) {
 		expectLine(t, cmdLine, "Yes")
 	})
 
+	t.Run("should be able open two accounts and check balance on each one", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+
+		go startBankUI(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "No")
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "20")
+		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "Yes")
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-other-name")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "50")
+		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "Yes")
+
+		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
+		expectLine(t, cmdLine, "20")
+
+		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-other-name")
+		expectLine(t, cmdLine, "50")
+	})
+
 	t.Run("negative check", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
 
