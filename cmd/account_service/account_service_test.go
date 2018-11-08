@@ -33,4 +33,50 @@ func TestAccountService(t *testing.T) {
 		_, err := accountService.CheckBalance("second account")
 		require.Error(t, err)
 	})
+
+
+	t.Run("check balance on non-existant account", func(t *testing.T) {
+		accountService := NewAccountService()
+		_, err := accountService.CheckBalance("wrong account")
+		require.Error(t, err)
+	})
+
+
+	t.Run("open account and withdraw money", func(t *testing.T) {
+		accountService := NewAccountService()
+		accountService.Open("first account", 20)
+		err := accountService.Withdraw("first account", 10)
+		require.NoError(t, err)
+
+		balance, _ := accountService.CheckBalance("first account")
+
+		require.Equal(t, int64(10), balance)
+	})
+
+	t.Run("open account and withdraw money from non existant account", func(t *testing.T) {
+		accountService := NewAccountService()
+		accountService.Open("first account", 20)
+		err := accountService.Withdraw("non existant account", 10)
+		require.Error(t, err)
+	})
+
+	t.Run("don't open account and withdraw money from non existant account", func(t *testing.T) {
+		accountService := NewAccountService()
+		err := accountService.Withdraw("non existant account", 10)
+		require.Error(t, err)
+	})
+
+	t.Run("should be able open two accounts and check balance on each one", func(t *testing.T) {
+		accountService := NewAccountService()
+		accountService.Open("first account", 20)
+		accountService.Open("second account", 30)
+		firstAccountBalance, _ := accountService.CheckBalance("first account")
+		require.Equal(t, int64(20), firstAccountBalance)
+
+		secondAccountBalance, _ := accountService.CheckBalance("second account")
+		require.Equal(t, int64(30), secondAccountBalance)
+
+	})
+
+
 }
