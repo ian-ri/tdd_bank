@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"github.com/mmircea16/tdd_bank/cmd/account"
 	"fmt"
+	"github.com/mmircea16/tdd_bank/cmd/account_service"
 )
 
 func main() {
@@ -23,7 +24,9 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	writer.Write([]byte("3. Check Balance\n"))
 	writer.Write([]byte("4. Withdraw Money\n"))
 
-	myAccounts := make(map[string]*account.Account)
+	//myAccounts := make(map[string]*account.Account)
+
+	myAccountServices := account_service.NewAccountService()
 
 	for {
 		input := readFromCmdLine(scanner)
@@ -37,13 +40,12 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 			name := readFromCmdLine(scanner)
 			writer.Write([]byte("How much money?\n"))
 			amount := readIntFromCmdLine(writer, scanner)
-			myAccount := account.NewAccount(name, amount)
-
-			if myAccount == nil {
-				writer.Write([]byte("Cannot be negative\n"))
+			//myAccount := account.NewAccount(name, amount)
+			err := myAccountServices.Open(name,amount)
+			if err != nil {
+				writer.Write([]byte("Cannot be negative\n")) //refactor error message TODO
 			} else {
 
-				myAccounts[name] = myAccount
 				writer.Write([]byte("Account opened\n"))
 
 				continue
@@ -51,7 +53,9 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 		}
 
 		if input == "2" {
-			if len(myAccounts) > 0 {
+
+
+			if myAccountServices.AnyAccountExists() {
 				writer.Write([]byte("Yes\n"))
 			} else {
 				writer.Write([]byte("No\n"))

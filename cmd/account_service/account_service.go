@@ -13,6 +13,7 @@ type AccountService interface {
 	Open(accountName string, initialAmount int64) error
 	CheckBalance(accountName string) (int64,error)
 	Withdraw(accountName string, amount int64) error
+	AnyAccountExists() bool
 }
 
 
@@ -37,6 +38,10 @@ func (a *accountService) accountExists(accountName string) bool {
 		return false
 	}
 	return true
+}
+
+func (a *accountService) AnyAccountExists() bool {
+	return len(a.accounts) > 0
 }
 
 func (a *accountService) CheckBalance(accountName string) (int64,error) {

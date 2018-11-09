@@ -78,5 +78,18 @@ func TestAccountService(t *testing.T) {
 
 	})
 
+	t.Run("open account and check if exists", func(t *testing.T) {
+		accountService := NewAccountService()
+		accountService.Open("first account", 20)
+		found := accountService.AnyAccountExists()
+		require.True(t,found)
+	})
+
+	t.Run("dont open account and check if any exist", func(t *testing.T) {
+		accountService := NewAccountService()
+		found := accountService.AnyAccountExists()
+		require.False(t,found)
+	})
+
 
 }
