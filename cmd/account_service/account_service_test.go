@@ -34,13 +34,11 @@ func TestAccountService(t *testing.T) {
 		require.Error(t, err)
 	})
 
-
 	t.Run("check balance on non-existant account", func(t *testing.T) {
 		accountService := NewAccountService()
 		_, err := accountService.CheckBalance("wrong account")
 		require.Error(t, err)
 	})
-
 
 	t.Run("open account and withdraw money", func(t *testing.T) {
 		accountService := NewAccountService()
@@ -82,14 +80,27 @@ func TestAccountService(t *testing.T) {
 		accountService := NewAccountService()
 		accountService.Open("first account", 20)
 		found := accountService.AnyAccountExists()
-		require.True(t,found)
+		require.True(t, found)
 	})
 
 	t.Run("dont open account and check if any exist", func(t *testing.T) {
 		accountService := NewAccountService()
 		found := accountService.AnyAccountExists()
-		require.False(t,found)
+		require.False(t, found)
 	})
 
+	t.Run("open account and check if account exists", func(t *testing.T) {
+		accountService := NewAccountService()
+		accountService.Open("some-name", 20)
+		found := accountService.AccountExists("some-name")
+		require.True(t, found)
+	})
+
+	t.Run("check if account exists for non-existant account", func(t *testing.T) {
+		accountService := NewAccountService()
+
+		found := accountService.AccountExists("some-name")
+		require.False(t, found)
+	})
 
 }

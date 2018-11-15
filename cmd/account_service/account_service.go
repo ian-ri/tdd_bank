@@ -14,6 +14,7 @@ type AccountService interface {
 	CheckBalance(accountName string) (int64,error)
 	Withdraw(accountName string, amount int64) error
 	AnyAccountExists() bool
+	AccountExists(accountName string) bool
 }
 
 
@@ -33,7 +34,7 @@ func NewAccountService() AccountService {
 
 }
 
-func (a *accountService) accountExists(accountName string) bool {
+func (a *accountService) AccountExists(accountName string) bool {
 	if _,ok := a.accounts[accountName] ; !ok {
 		return false
 	}
@@ -46,7 +47,7 @@ func (a *accountService) AnyAccountExists() bool {
 
 func (a *accountService) CheckBalance(accountName string) (int64,error) {
 
-	if !a.accountExists(accountName) {
+	if !a.AccountExists(accountName) {
 		return 0, errors.New("Account does not exist")
 	}
 	return a.accounts[accountName].CheckBalance(), nil
@@ -54,7 +55,7 @@ func (a *accountService) CheckBalance(accountName string) (int64,error) {
 
 func (a *accountService) Withdraw(accountName string, amount int64) error {
 
-	if !a.accountExists(accountName) {
+	if !a.AccountExists(accountName) {
 		return errors.New("Account does not exist")
 	}
 	a.accounts[accountName].Withdraw(amount)
