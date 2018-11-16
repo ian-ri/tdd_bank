@@ -1,3 +1,5 @@
+//go:generate mockgen -package account_service -source=account_service.go -destination account_service_mock.go
+
 package account_service
 
 import (

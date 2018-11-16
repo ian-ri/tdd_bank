@@ -9,11 +9,22 @@ import (
 	"github.com/mmircea16/tdd_bank/cmd/account_service"
 )
 
-func main() {
-	startBankUI(os.Stdin, os.Stdout)
+type bankUI struct {
+	myAccountServices account_service.AccountService
 }
 
-func startBankUI(reader io.Reader, writer io.Writer) {
+func NewBankUI(myAccountServices account_service.AccountService) bankUI{
+	return bankUI{
+		myAccountServices:myAccountServices,
+	}
+}
+
+func main() {
+	ui := NewBankUI(account_service.NewAccountService())
+	ui.start(os.Stdin, os.Stdout)
+}
+
+func (b bankUI) start(reader io.Reader, writer io.Writer) {
 	scanner := bufio.NewScanner(reader)
 	writer.Write([]byte("Welcome to the Golang bank\n"))
 	writer.Write([]byte("You have the folllowing choices:\n"))
@@ -22,9 +33,6 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 	writer.Write([]byte("2. Do I have an opened account?\n"))
 	writer.Write([]byte("3. Check Balance\n"))
 	writer.Write([]byte("4. Withdraw Money\n"))
-
-
-	myAccountServices := account_service.NewAccountService()
 
 	for {
 		input := readFromCmdLine(scanner)
@@ -39,7 +47,7 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 			writer.Write([]byte("How much money?\n"))
 			amount := readIntFromCmdLine(writer, scanner)
 
-			err := myAccountServices.Open(name, amount)
+			err := b.myAccountServices.Open(name, amount)
 			if err != nil {
 				writer.Write([]byte("Cannot be negative\n")) //refactor error message TODO
 			} else {
@@ -52,7 +60,7 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 
 		if input == "2" {
 
-			if myAccountServices.AnyAccountExists() {
+			if b.myAccountServices.AnyAccountExists() {
 				writer.Write([]byte("Yes\n"))
 			} else {
 				writer.Write([]byte("No\n"))
@@ -61,12 +69,12 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 
 		if input == "3" {
 
-			if !myAccountServices.AnyAccountExists() {
+			if !b.myAccountServices.AnyAccountExists() {
 				writer.Write([]byte("No account available\n"))
 			} else {
 				writer.Write([]byte("Enter account name\n"))
 				name := readFromCmdLine(scanner)
-				balance, err := myAccountServices.CheckBalance(name)
+				balance, err := b.myAccountServices.CheckBalance(name)
 				if err != nil {
 					writer.Write([]byte("account doesnt exist\n"))
 				} else {
@@ -76,18 +84,18 @@ func startBankUI(reader io.Reader, writer io.Writer) {
 		}
 
 		if input == "4" {
-			if !myAccountServices.AnyAccountExists() {
+			if !b.myAccountServices.AnyAccountExists() {
 				writer.Write([]byte("No account available\n"))
 			} else {
 				writer.Write([]byte("Enter account name\n"))
 				name := readFromCmdLine(scanner)
-				if !myAccountServices.AccountExists(name) {
+				if !b.myAccountServices.AccountExists(name) {
 					writer.Write([]byte("account doesnt exist\n"))
 				}
 
 				writer.Write([]byte("How much money to withdraw?\n"))
 				amount := readIntFromCmdLine(writer, scanner)
-				err := myAccountServices.Withdraw(name, amount)
+				err := b.myAccountServices.Withdraw(name, amount)
 				if err == nil {
 					writer.Write([]byte("Successful\n"))
 				}

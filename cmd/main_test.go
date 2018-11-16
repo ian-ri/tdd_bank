@@ -6,31 +6,38 @@ import (
 	"github.com/stretchr/testify/require"
 	"io"
 	"bufio"
+	"github.com/mmircea16/tdd_bank/cmd/account_service"
+	"github.com/golang/mock/gomock"
 )
 
 func TestStartBankUI(t *testing.T) {
 	t.Run("should be able open an account", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		ctrl := gomock.NewController(t)
+
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+
+		mockAccountService.EXPECT().Open("some-name", int64(20)).Return(nil)
+		b := NewBankUI(mockAccountService)
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
-		respond(cmdLine, "2")
-		expectLine(t, cmdLine, "No")
 		respond(cmdLine, "1")
 		expectLine(t, cmdLine, "Enter account name")
 		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "How much money?")
 		respond(cmdLine, "20")
 		expectLine(t, cmdLine, "Account opened")
-		respond(cmdLine, "2")
-		expectLine(t, cmdLine, "Yes")
 	})
 
 	t.Run("should be able open two accounts and check balance on each one", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		b := NewBankUI(account_service.NewAccountService())
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "2")
@@ -66,7 +73,9 @@ func TestStartBankUI(t *testing.T) {
 	t.Run("negative check", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		b := NewBankUI(account_service.NewAccountService())
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "2")
@@ -84,7 +93,9 @@ func TestStartBankUI(t *testing.T) {
 	t.Run("open account and check balance", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		b := NewBankUI(account_service.NewAccountService())
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "1")
@@ -102,7 +113,9 @@ func TestStartBankUI(t *testing.T) {
 	t.Run("open account and check balance for non-existant account", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		b := NewBankUI(account_service.NewAccountService())
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "1")
@@ -120,7 +133,9 @@ func TestStartBankUI(t *testing.T) {
 	t.Run("check balance on non-existant account", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		b := NewBankUI(account_service.NewAccountService())
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "3")
@@ -130,7 +145,9 @@ func TestStartBankUI(t *testing.T) {
 	t.Run("open account and withdraw money", func(t *testing.T){
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		b := NewBankUI(account_service.NewAccountService())
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "1")
@@ -155,7 +172,9 @@ func TestStartBankUI(t *testing.T) {
 	t.Run("open account and withdraw money from non-existant account", func(t *testing.T){
 		cmdLine := NewFakeCmdLine()
 
-		go startBankUI(cmdLine, cmdLine)
+		b := NewBankUI(account_service.NewAccountService())
+
+		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
 		respond(cmdLine, "1")
