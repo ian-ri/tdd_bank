@@ -8,133 +8,94 @@ import (
 	"bufio"
 	"github.com/mmircea16/tdd_bank/cmd/account_service"
 	"github.com/golang/mock/gomock"
+	"github.com/pkg/errors"
 )
 
 func TestStartBankUI(t *testing.T) {
 	t.Run("should be able open an account", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
-
 		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().Open("some-name", int64(20)).Return(nil)
 
+		b := NewBankUI(mockAccountService)
+		go b.start(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "1")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-name")
+		expectLine(t, cmdLine, "How much money?")
+		respond(cmdLine, "20")
+		expectLine(t, cmdLine, "Account opened")
+	})
+
+	t.Run("should be able to exit bank", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
 		mockAccountService := account_service.NewMockAccountService(ctrl)
 
-		mockAccountService.EXPECT().Open("some-name", int64(20)).Return(nil)
 		b := NewBankUI(mockAccountService)
-
 		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
-		respond(cmdLine, "1")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "How much money?")
-		respond(cmdLine, "20")
-		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "0")
+		expectLine(t, cmdLine, "Goodbye!")
 	})
 
-	t.Run("should be able open two accounts and check balance on each one", func(t *testing.T) {
+	t.Run("should not be able to open account with a negative balance", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().Open(gomock.Any(), gomock.Any()).Times(1).Return(errors.New("An error"))
 
-		b := NewBankUI(account_service.NewAccountService())
-
+		b := NewBankUI(mockAccountService)
 		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
-		respond(cmdLine, "2")
-		expectLine(t, cmdLine, "No")
-		respond(cmdLine, "1")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "How much money?")
-		respond(cmdLine, "20")
-		expectLine(t, cmdLine, "Account opened")
-		respond(cmdLine, "2")
-		expectLine(t, cmdLine, "Yes")
-		respond(cmdLine, "1")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-other-name")
-		expectLine(t, cmdLine, "How much money?")
-		respond(cmdLine, "50")
-		expectLine(t, cmdLine, "Account opened")
-		respond(cmdLine, "2")
-		expectLine(t, cmdLine, "Yes")
-
-		respond(cmdLine, "3")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "20")
-
-		respond(cmdLine, "3")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-other-name")
-		expectLine(t, cmdLine, "50")
-	})
-
-	t.Run("negative check", func(t *testing.T) {
-		cmdLine := NewFakeCmdLine()
-
-		b := NewBankUI(account_service.NewAccountService())
-
-		go b.start(cmdLine, cmdLine)
-
-		expectMenu(t, cmdLine)
-		respond(cmdLine, "2")
-		expectLine(t, cmdLine, "No")
 		respond(cmdLine, "1")
 		expectLine(t, cmdLine, "Enter account name")
 		respond(cmdLine, "some-name")
 		expectLine(t, cmdLine, "How much money?")
 		respond(cmdLine, "-20")
 		expectLine(t, cmdLine, "Cannot be negative")
+	})
+
+	t.Run("should be able to check if any account exists and it does", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(true)
+
+		b := NewBankUI(mockAccountService)
+		go b.start(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "2")
+		expectLine(t, cmdLine, "Yes")
+	})
+
+	t.Run("should be able to check if any account exists and it doesn't", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(false)
+
+		b := NewBankUI(mockAccountService)
+		go b.start(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
 		respond(cmdLine, "2")
 		expectLine(t, cmdLine, "No")
 	})
 
-	t.Run("open account and check balance", func(t *testing.T) {
+	t.Run("should be able to try to check balance when no account exists", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(false)
 
-		b := NewBankUI(account_service.NewAccountService())
-
-		go b.start(cmdLine, cmdLine)
-
-		expectMenu(t, cmdLine)
-		respond(cmdLine, "1")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "How much money?")
-		respond(cmdLine, "100")
-		expectLine(t, cmdLine, "Account opened")
-		respond(cmdLine, "3")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "100")
-	})
-
-	t.Run("open account and check balance for non-existant account", func(t *testing.T) {
-		cmdLine := NewFakeCmdLine()
-
-		b := NewBankUI(account_service.NewAccountService())
-
-		go b.start(cmdLine, cmdLine)
-
-		expectMenu(t, cmdLine)
-		respond(cmdLine, "1")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "How much money?")
-		respond(cmdLine, "100")
-		expectLine(t, cmdLine, "Account opened")
-		respond(cmdLine, "3")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "someone else")
-		expectLine(t, cmdLine, "account doesnt exist")
-	})
-
-	t.Run("check balance on non-existant account", func(t *testing.T) {
-		cmdLine := NewFakeCmdLine()
-
-		b := NewBankUI(account_service.NewAccountService())
-
+		b := NewBankUI(mockAccountService)
 		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
@@ -142,57 +103,97 @@ func TestStartBankUI(t *testing.T) {
 		expectLine(t, cmdLine, "No account available")
 	})
 
-	t.Run("open account and withdraw money", func(t *testing.T){
+	t.Run("should be able to try to check balance when only a different account exists", func(t *testing.T) {
 		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(true)
+		mockAccountService.EXPECT().CheckBalance("some-account").Times(1).Return(int64(0), errors.New("an error"))
 
-		b := NewBankUI(account_service.NewAccountService())
-
+		b := NewBankUI(mockAccountService)
 		go b.start(cmdLine, cmdLine)
 
 		expectMenu(t, cmdLine)
-		respond(cmdLine, "1")
+		respond(cmdLine, "3")
 		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "How much money?")
-		respond(cmdLine, "100")
-		expectLine(t, cmdLine, "Account opened")
+		respond(cmdLine, "some-account")
+		expectLine(t, cmdLine, "account doesnt exist")
+	})
+
+	t.Run("should be able to check balance when account exists", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(true)
+		mockAccountService.EXPECT().CheckBalance("some-account").Times(1).Return(int64(20), nil)
+
+		b := NewBankUI(mockAccountService)
+		go b.start(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "3")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-account")
+		expectLine(t, cmdLine, "20")
+	})
+
+
+	t.Run("should be able to try to withdraw money where no accounts exist", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(false)
+
+		b := NewBankUI(mockAccountService)
+		go b.start(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "4")
+		expectLine(t, cmdLine, "No account available")
+	})
+
+	t.Run("should be able to try to withdraw money when only a different account exists", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(true)
+		mockAccountService.EXPECT().AccountExists("some-account").Times(1).Return(false)
+
+		b := NewBankUI(mockAccountService)
+		go b.start(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
 		respond(cmdLine, "4")
 		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
+		respond(cmdLine, "some-account")
+		expectLine(t, cmdLine, "account doesnt exist")
+	})
+
+	t.Run("should be able to withdraw money when account exists", func(t *testing.T) {
+		cmdLine := NewFakeCmdLine()
+		ctrl := gomock.NewController(t)
+		mockAccountService := account_service.NewMockAccountService(ctrl)
+		mockAccountService.EXPECT().AnyAccountExists().Times(1).Return(true)
+		mockAccountService.EXPECT().AccountExists("some-account").Times(1).Return(true)
+		mockAccountService.EXPECT().Withdraw("some-account", int64(20)).Times(1).Return(nil)
+
+		b := NewBankUI(mockAccountService)
+		go b.start(cmdLine, cmdLine)
+
+		expectMenu(t, cmdLine)
+		respond(cmdLine, "4")
+		expectLine(t, cmdLine, "Enter account name")
+		respond(cmdLine, "some-account")
 		expectLine(t, cmdLine, "How much money to withdraw?")
 		respond(cmdLine, "20")
 		expectLine(t, cmdLine, "Successful")
-		respond(cmdLine, "3")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "80")
 	})
 
-
-	t.Run("open account and withdraw money from non-existant account", func(t *testing.T){
-		cmdLine := NewFakeCmdLine()
-
-		b := NewBankUI(account_service.NewAccountService())
-
-		go b.start(cmdLine, cmdLine)
-
-		expectMenu(t, cmdLine)
-		respond(cmdLine, "1")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some-name")
-		expectLine(t, cmdLine, "How much money?")
-		respond(cmdLine, "100")
-		expectLine(t, cmdLine, "Account opened")
-		respond(cmdLine, "4")
-		expectLine(t, cmdLine, "Enter account name")
-		respond(cmdLine, "some other account")
-		expectLine(t, cmdLine, "account doesnt exist")
-	})
 }
 
 func expectMenu(t *testing.T, cmdLine *fakeCmdLine) {
 	expectLine(t, cmdLine, "Welcome to the Golang bank")
-	expectLine(t, cmdLine, "You have the folllowing choices:")
+	expectLine(t, cmdLine, "You have the following choices:")
 	expectLine(t, cmdLine, "0. Exit")
 	expectLine(t, cmdLine, "1. Open account")
 	expectLine(t, cmdLine, "2. Do I have an opened account?")

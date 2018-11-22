@@ -27,7 +27,7 @@ func main() {
 func (b bankUI) start(reader io.Reader, writer io.Writer) {
 	scanner := bufio.NewScanner(reader)
 	writer.Write([]byte("Welcome to the Golang bank\n"))
-	writer.Write([]byte("You have the folllowing choices:\n"))
+	writer.Write([]byte("You have the following choices:\n"))
 	writer.Write([]byte("0. Exit\n"))
 	writer.Write([]byte("1. Open account\n"))
 	writer.Write([]byte("2. Do I have an opened account?\n"))
@@ -38,6 +38,7 @@ func (b bankUI) start(reader io.Reader, writer io.Writer) {
 		input := readFromCmdLine(scanner)
 
 		if input == "0" {
+			writer.Write([]byte("Goodbye!\n"))
 			break
 		}
 
